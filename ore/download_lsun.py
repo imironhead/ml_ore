@@ -1,4 +1,5 @@
 """
+downloader method for lsun datasets.
 """
 import datasets
 import os
@@ -17,9 +18,6 @@ def download_lsun(dataset_index, data_path):
     if os.path.isfile(path_data) and os.path.isfile(path_lock):
         # downloaded
         return
-
-    if not os.path.isdir(data_path):
-        os.makedirs(data_path)
 
     # download
     table = {

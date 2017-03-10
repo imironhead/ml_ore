@@ -4,8 +4,10 @@ describe all supported datasets.
 import os
 
 from download_lsun import download_lsun
+from download_mnist import download_mnist
 from process_lsun import process_lsun
 from source_lsun import SourceLsun
+from source_mnist import SourceMnist
 
 
 __all__ = [
@@ -32,12 +34,21 @@ __all__ = [
     'DATASET_LSUN_TOWER_VALIDATION',
     'DATASET_LSUN_TEST',
 
+    'DATASET_MNIST',
+    'DATASET_MNIST_TRAINING',
+    'DATASET_MNIST_TEST',
+
+
     'LABEL_INVALID',
 
     'LABEL_LSUN_BEDROOM', 'LABEL_LSUN_BRIDGE', 'LABEL_LSUN_CHURCH_OUTDOOR',
     'LABEL_LSUN_CLASSROOM', 'LABEL_LSUN_CONFERENCE_ROOM',
     'LABEL_LSUN_DINING_ROOM', 'LABEL_LSUN_KITCHEN', 'LABEL_LSUN_LIVING_ROOM',
     'LABEL_LSUN_RESTAURANT', 'LABEL_LSUN_TOWER',
+
+    'LABEL_MNIST_0', 'LABEL_MNIST_1', 'LABEL_MNIST_2', 'LABEL_MNIST_3',
+    'LABEL_MNIST_4', 'LABEL_MNIST_5', 'LABEL_MNIST_6', 'LABEL_MNIST_7',
+    'LABEL_MNIST_8', 'LABEL_MNIST_9',
     ]
 
 
@@ -64,6 +75,10 @@ DATASET_LSUN_TOWER_TRAINING = DATASET_LSUN + 0x00000012
 DATASET_LSUN_TOWER_VALIDATION = DATASET_LSUN + 0x00000013
 DATASET_LSUN_TEST = DATASET_LSUN + 0x00000014
 
+DATASET_MNIST = 0x00020000
+DATASET_MNIST_TRAINING = DATASET_MNIST + 0x00000000
+DATASET_MNIST_TEST = DATASET_MNIST + 0x00000000
+
 LABEL_INVALID = -1
 
 # https://github.com/fyu/lsun/blob/master/category_indices.txt
@@ -77,6 +92,17 @@ LABEL_LSUN_KITCHEN = 6
 LABEL_LSUN_LIVING_ROOM = 7
 LABEL_LSUN_RESTAURANT = 8
 LABEL_LSUN_TOWER = 9
+
+LABEL_MNIST_0 = 0
+LABEL_MNIST_1 = 1
+LABEL_MNIST_2 = 2
+LABEL_MNIST_3 = 3
+LABEL_MNIST_4 = 4
+LABEL_MNIST_5 = 5
+LABEL_MNIST_6 = 6
+LABEL_MNIST_7 = 7
+LABEL_MNIST_8 = 8
+LABEL_MNIST_9 = 9
 
 
 def prepare_source(dataset_index, data_path=None):
@@ -93,7 +119,7 @@ def prepare_source(dataset_index, data_path=None):
     process_source(dataset_index, data_path)
 
     # create the source.
-    sources = [(is_lsun, SourceLsun)]
+    sources = [(is_lsun, SourceLsun), (is_mnist, SourceMnist)]
 
     for source in sources:
         if source[0](dataset_index):
@@ -107,7 +133,7 @@ def download_source(dataset_index, data_path):
     # sanity check
     assert data_path is not None, 'need a data_path'
 
-    downloaders = [(is_lsun, download_lsun)]
+    downloaders = [(is_lsun, download_lsun), (is_mnist, download_mnist)]
 
     for downloader in downloaders:
         if downloader[0](dataset_index):
@@ -172,6 +198,9 @@ def default_data_path(dataset_index, data_path=None):
             DATASET_LSUN_TOWER_VALIDATION:
                 ('data', 'lsun', 'tower_val_lmdb'),
             DATASET_LSUN_TEST: ('data', 'lsun', 'test_lmdb'),
+
+            DATASET_MNIST_TRAINING: ('data', 'mnist'),
+            DATASET_MNIST_TEST: ('data', 'mnist'),
         }
 
         path_home = os.path.expanduser('~')
@@ -180,7 +209,22 @@ def default_data_path(dataset_index, data_path=None):
 
         data_path = os.path.join(path_home, data_path)
 
+        if not os.path.isdir(data_path):
+            os.makedirs(data_path)
+
     return data_path
+
+
+def is_mnist(index):
+    """
+    """
+    return index in mnist_dataset_indice()
+
+
+def mnist_dataset_indice():
+    """
+    """
+    return [DATASET_MNIST_TRAINING, DATASET_MNIST_TEST]
 
 
 def is_lsun(index):
