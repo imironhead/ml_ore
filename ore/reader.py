@@ -31,7 +31,7 @@ class Reader(object):
         """
         return self._source.size
 
-    def next_batch(self, batch_size):
+    def next_batch(self, batch_size, **options):
         """
         """
         is_new_epoch = False
@@ -51,6 +51,7 @@ class Reader(object):
 
             assert batch_size <= len(self._indice)
 
-        new_batch = self._source.batch(self._indice[begin:self._position])
+        new_batch = self._source.batch(
+            self._indice[begin:self._position], **options)
 
         return new_batch + (is_new_epoch,)

@@ -14,6 +14,20 @@ import datasets
 class SourceLsun(object):
     """
     """
+    @staticmethod
+    def default_map_fn(img):
+        """
+        """
+        w, h = img.shape[:2]
+
+        x, y = (w / 2) - 128, (h / 2) - 128
+
+        img = img[x:x + 256, y:y + 256, :]
+        img = img.astype(numpy.float32)
+        img = img / 127.5 - 1.0
+
+        return scipy.misc.imresize(img, 25)
+
     def __init__(self, dataset_index, path_lmdb):
         """
         """
@@ -66,12 +80,13 @@ class SourceLsun(object):
         """
         return len(self._lmdb_keys)
 
-    def batch(self, idx_list=[]):
+    def batch(self, idx_list=[], map_fn=default_map_fn.__func__):
         """
-        need a flag to specify output format (e.g. crop or not)
-        scale / crop offset (center or random)
+        idx_list: list of data indice.
+        map_fn: map_fn(source_numpy_array), return target_numpy_array
         """
-        images = numpy.zeros((len(idx_list), 256, 256, 3))
+        cnt = len(idx_list)
+        ims = None
 
         with lmdb.open(self._lmdb_path) as env:
             with env.begin(write=False) as txn:
@@ -83,19 +98,11 @@ class SourceLsun(object):
                         val = cursor.get(self._lmdb_keys[j])
                         sio = StringIO.StringIO(val)
                         img = scipy.misc.imread(sio)
-                        # img = scipy.misc.imresize(img, 25)
+                        img = map_fn(img)
 
-                        w, h = img.shape[:2]
+                        if ims is None:
+                            ims = numpy.zeros((cnt,) + img.shape)
 
-                        x, y = (w / 2) - 128, (h / 2) - 128
+                        ims[i, :, :, :] = img
 
-                        img = img[x:x + 256, y:y + 256, :]
-
-                        img = img.astype(numpy.float32)
-
-                        img /= 127.5
-                        img -= 1.0
-
-                        images[i, :, :, :] = img
-
-        return images, numpy.repeat(self._label, len(idx_list))
+        return ims, numpy.repeat(self._label, cnt)
