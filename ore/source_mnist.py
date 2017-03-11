@@ -110,10 +110,12 @@ class SourceMnist(object):
         """
         return self._labels.shape[0]
 
-    def batch(self, idx_list=[], map_fn=default_map_fn.__func__):
+    def batch(self, idx_list=[], map_fn=default_map_fn.__func__,
+              one_hot=False):
         """
         idx_list: list of data indice.
         map_fn: map_fn(source_numpy_array), return target_numpy_array
+        one_hot: return one_hot label if it's True
         """
         cnt = len(idx_list)
         ims = None
@@ -130,7 +132,12 @@ class SourceMnist(object):
                 ims = numpy.zeros((cnt,) + img.shape)
                 idx = numpy.zeros((cnt,), dtype=numpy.int32)
 
-            ims[i, :, :, :] = img
+            ims[i] = img
             idx[i] = self._labels[j]
+
+        if one_hot:
+            tmp = idx
+            idx = numpy.zeros((cnt, 10), dtype=numpy.float32)
+            idx[numpy.arange(cnt), tmp] = 1.0
 
         return ims, idx
