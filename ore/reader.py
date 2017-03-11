@@ -33,6 +33,8 @@ class Reader(object):
 
     def next_batch(self, batch_size, **options):
         """
+        map_fn: map_fn(source_numpy_array), return target_numpy_array
+        one_hot: return one_hot label if it's True
         """
         is_new_epoch = False
 
