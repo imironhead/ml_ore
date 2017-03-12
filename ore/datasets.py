@@ -3,9 +3,11 @@ describe all supported datasets.
 """
 import os
 
+from download_cifar_10 import download_cifar_10
 from download_lsun import download_lsun
 from download_mnist import download_mnist
 from process_lsun import process_lsun
+from source_cifar_10 import SourceCifar10
 from source_lsun import SourceLsun
 from source_mnist import SourceMnist
 
@@ -38,6 +40,9 @@ __all__ = [
     'DATASET_MNIST_TRAINING',
     'DATASET_MNIST_TEST',
 
+    'DATASET_CIFAR_10',
+    'DATASET_CIFAR_10_TRAINING',
+    'DATASET_CIFAR_10_TEST',
 
     'LABEL_INVALID',
 
@@ -77,7 +82,11 @@ DATASET_LSUN_TEST = DATASET_LSUN + 0x00000014
 
 DATASET_MNIST = 0x00020000
 DATASET_MNIST_TRAINING = DATASET_MNIST + 0x00000000
-DATASET_MNIST_TEST = DATASET_MNIST + 0x00000000
+DATASET_MNIST_TEST = DATASET_MNIST + 0x00000001
+
+DATASET_CIFAR_10 = 0x00030000
+DATASET_CIFAR_10_TRAINING = DATASET_CIFAR_10 + 0x00000000
+DATASET_CIFAR_10_TEST = DATASET_CIFAR_10 + 0x00000001
 
 LABEL_INVALID = -1
 
@@ -119,7 +128,10 @@ def prepare_source(dataset_index, data_path=None):
     process_source(dataset_index, data_path)
 
     # create the source.
-    sources = [(is_lsun, SourceLsun), (is_mnist, SourceMnist)]
+    sources = [
+        (is_cifar_10, SourceCifar10),
+        (is_lsun, SourceLsun),
+        (is_mnist, SourceMnist)]
 
     for source in sources:
         if source[0](dataset_index):
@@ -133,7 +145,10 @@ def download_source(dataset_index, data_path):
     # sanity check
     assert data_path is not None, 'need a data_path'
 
-    downloaders = [(is_lsun, download_lsun), (is_mnist, download_mnist)]
+    downloaders = [
+        (is_cifar_10, download_cifar_10),
+        (is_lsun, download_lsun),
+        (is_mnist, download_mnist)]
 
     for downloader in downloaders:
         if downloader[0](dataset_index):
@@ -157,6 +172,9 @@ def default_data_path(dataset_index, data_path=None):
     """
     if data_path is None:
         table = {
+            DATASET_CIFAR_10_TRAINING: ('data', 'cifar-10-batches-py'),
+            DATASET_CIFAR_10_TEST: ('data', 'cifar-10-batches-py'),
+
             DATASET_LSUN_BEDROOM_TRAINING:
                 ('data', 'lsun', 'bedroom_train_lmdb'),
             DATASET_LSUN_BEDROOM_VALIDATION:
@@ -213,6 +231,18 @@ def default_data_path(dataset_index, data_path=None):
             os.makedirs(data_path)
 
     return data_path
+
+
+def is_cifar_10(index):
+    """
+    """
+    return index in cifar_10_indice()
+
+
+def cifar_10_indice():
+    """
+    """
+    return [DATASET_CIFAR_10_TRAINING, DATASET_CIFAR_10_TEST]
 
 
 def is_mnist(index):
