@@ -3,29 +3,53 @@ reader class to handle different datasets.
 """
 import numpy
 
-import datasets
+from source_cifar_10 import SourceCifar10
+from source_lsun import SourceLsun
+from source_mnist import SourceMnist
 
 
 class Reader(object):
     """
     """
-    def __init__(self, dataset_index, data_path=None, **options):
+    @staticmethod
+    def create_source(dataset, data_path=None):
+        """
+        data source virtual constructor. data_path can be None to use default
+        path.
+        """
+        source_clazzs = [SourceCifar10, SourceLsun, SourceMnist]
+        source_clazz = None
+
+        for clazz in source_clazzs:
+            if clazz.include(dataset):
+                source_clazz = clazz
+                break
+
+        if source_clazz is None:
+            raise Exception('dataset {} is not suported'.format(dataset))
+
+        return source_clazz(dataset, data_path)
+
+    def __init__(self, dataset, data_path=None):
         """
         """
-        self._source = datasets.prepare_source(dataset_index, data_path)
+        self._source = Reader.create_source(dataset, data_path)
         self._indice = numpy.random.permutation(self._source.size)
         self._position = 0
 
+    @property
     def cite(self):
         """
         """
         return self._source.cite
 
+    @property
     def info(self):
         """
         """
         return self._source.info
 
+    @property
     def size(self):
         """
         """
