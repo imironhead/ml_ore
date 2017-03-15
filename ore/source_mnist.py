@@ -13,6 +13,62 @@ class SourceMnist(object):
     a class to track raw mnist data.
     """
     @staticmethod
+    def default_data_path(dataset):
+        """
+        default path of mnist dataset if it's not provided.
+        """
+        path_home = os.path.expanduser('~')
+
+        return os.path.join(path_home, 'data', 'mnist')
+
+    @staticmethod
+    def subsets():
+        """
+        """
+        return [datasets.DATASET_MNIST_TRAINING, datasets.DATASET_MNIST_TEST]
+
+    @staticmethod
+    def include(dataset):
+        """
+        """
+        return dataset in SourceMnist.subsets()
+
+    @staticmethod
+    def download(dataset, data_path):
+        """
+        download all 4 *.gz files if necessary.
+        """
+        # sanity check
+        assert data_path is not None, 'data_path should not be None'
+
+        if not os.path.isdir(data_path):
+            os.makedirs(data_path)
+
+        base = 'http://yann.lecun.com/exdb/mnist/'
+        names = [
+            'train-images-idx3-ubyte.gz', 'train-labels-idx1-ubyte.gz',
+            't10k-images-idx3-ubyte.gz', 't10k-labels-idx1-ubyte.gz']
+
+        for name in names:
+            path_file = os.path.join(data_path, name)
+
+            if os.path.isfile(path_file):
+                continue
+
+            url = base + name
+
+            target_path = os.path.join(data_path, name)
+
+            print('downloading {} to {}'.format(url, target_path))
+
+            os.system('curl {} -o {}'.format(url, target_path))
+
+    @staticmethod
+    def pre_process(dataset, data_path):
+        """
+        """
+
+    @staticmethod
     def default_map_fn(img):
         """
         remap the image. the default mapping is to do nothing.
@@ -69,21 +125,24 @@ class SourceMnist(object):
 
         return labels.astype(numpy.int32)
 
-    def __init__(self, dataset_index, path_dir):
+    def __init__(self, dataset, data_path):
         """
         """
-        # sanity check
-        assert os.path.isdir(path_dir), '{} is not exist'.format(path_dir)
+        if data_path is None:
+            data_path = SourceMnist.default_data_path(dataset)
 
-        if dataset_index == datasets.DATASET_MNIST_TRAINING:
+        SourceMnist.download(dataset, data_path)
+        SourceMnist.pre_process(dataset, data_path)
+
+        if dataset == datasets.DATASET_MNIST_TRAINING:
             name = 'train'
         else:
             name = 't10k'
 
         path_images = os.path.join(
-            path_dir, '{}-images-idx3-ubyte.gz'.format(name))
+            data_path, '{}-images-idx3-ubyte.gz'.format(name))
         path_labels = os.path.join(
-            path_dir, '{}-labels-idx1-ubyte.gz'.format(name))
+            data_path, '{}-labels-idx1-ubyte.gz'.format(name))
 
         assert os.path.isfile(path_images), 'need {}'.format(path_images)
         assert os.path.isfile(path_labels), 'need {}'.format(path_labels)
@@ -111,7 +170,7 @@ class SourceMnist(object):
         return self._labels.shape[0]
 
     def batch(self, idx_list=[], map_fn=default_map_fn.__func__,
-              one_hot=False):
+              one_hot=False, **options):
         """
         idx_list: list of data indice.
         map_fn: map_fn(source_numpy_array), return target_numpy_array
