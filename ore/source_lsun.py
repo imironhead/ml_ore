@@ -6,7 +6,11 @@ import lmdb
 import numpy
 import pickle
 import scipy.misc
+import shutil
 import StringIO
+import zipfile
+
+from six.moves import urllib
 
 import datasets
 
@@ -152,20 +156,25 @@ class SourceLsun(object):
 
             print('downloading {} to {}'.format(url, temp_path))
 
-            os.system("curl '{}' -o {}".format(url, temp_path))
+            urllib.request.urlretrieve(url, temp_path)
 
         # unzip
-        os.system('unzip {} -d {}'.format(temp_path, data_path))
+        zipfile.ZipFile(temp_path, 'r').extractall(data_path)
 
         # move
         name_lmdb = '_'.join([n for n in names if len(n) > 0]) + '_lmdb'
-        path_mdbs = os.path.join(data_path, name_lmdb, '*')
+        path_mdbs = os.path.join(data_path, name_lmdb)
 
-        os.system('mv {} {}'.format(path_mdbs, data_path))
+        # os.system('mv {} {}'.format(path_mdbs, data_path))
+        for name in os.listdir(path_mdbs):
+            source_path = os.path.join(path_mdbs, name)
+            target_path = os.path.join(data_path, name)
+
+            shutil.move(source_path, target_path)
 
         # cleanup
-        os.system('rmdir {}'.format(os.path.join(data_path, name_lmdb)))
-        os.system('rm {}'.format(temp_path))
+        shutil.rmtree(path_mdbs)
+        os.remove(temp_path)
 
     @staticmethod
     def pre_process(dataset, data_path):
