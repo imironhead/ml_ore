@@ -5,6 +5,8 @@ import gzip
 import os
 import numpy
 
+from six.moves import urllib
+
 import datasets
 
 
@@ -61,7 +63,7 @@ class SourceMnist(object):
 
             print('downloading {} to {}'.format(url, target_path))
 
-            os.system('curl {} -o {}'.format(url, target_path))
+            urllib.request.urlretrieve(url, target_path)
 
     @staticmethod
     def pre_process(dataset, data_path):

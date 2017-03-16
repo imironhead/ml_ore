@@ -3,8 +3,10 @@
 import numpy
 import os
 import pickle
+import shutil
+import tarfile
 
-from builtins import range
+from six.moves import range, urllib
 
 import datasets
 
@@ -83,25 +85,28 @@ class SourceCifar10(object):
 
         print('downloading {}'.format(url))
 
-        os.system('curl {} -o {}'.format(url, gzip_path))
+        urllib.request.urlretrieve(url, gzip_path)
 
         # unzip, move
-        temp_source_path = os.path.join(data_path, 'cifar-10-batches-py', '*')
-        temp_target_path = data_path
+        temp_source_path = os.path.join(data_path, 'cifar-10-batches-py')
 
         # unzip data_path/cifar-10-python.tar.gz to data_path
         # become data_path/cifar-10-batches-py/*
-        os.system('tar -xzvf {} -C {}'.format(gzip_path, temp_target_path))
+        with tarfile.open(gzip_path) as tar:
+            tar.extractall(data_path)
 
         # move data_path/cifar-10-batches-py/* to data_path
-        os.system('mv {} {}'.format(temp_source_path, temp_target_path))
+        for name in os.listdir(temp_source_path):
+            source_path = os.path.join(temp_source_path, name)
+            target_path = os.path.join(data_path, name)
+
+            shutil.move(source_path, target_path)
 
         # remove data_path/cifar-10-batches-py
-        os.system('rmdir {}'.format(
-            os.path.join(data_path, 'cifar-10-batches-py')))
+        shutil.rmtree(temp_source_path)
 
         # remove data_path/cifar-10-python.tar.gz
-        os.system('rm {}'.format(gzip_path))
+        os.remove(gzip_path)
 
     @staticmethod
     def pre_process(dataset, data_path):
