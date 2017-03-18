@@ -10,7 +10,7 @@ from setuptools import setup
 
 setup(
     name='ore',
-    version='0.0.2',
+    version='0.0.3',
     url='https://github.com/imironhead/ml_ore',
     description='ask me later',
     long_description='ask me later please',
