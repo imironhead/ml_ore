@@ -21,5 +21,5 @@ setup(
     classifiers=[
         'Programming Language :: Python :: 2.7'
     ],
-    install_requires=['lmdb', 'numpy', 'scipy', 'six']
+    install_requires=['lmdb', 'numpy', 'pillow', 'scipy', 'six']
 )
