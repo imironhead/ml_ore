@@ -4,6 +4,7 @@ reader class to handle different datasets.
 import numpy
 
 from source_cifar_10 import SourceCifar10
+from source_kaggle_mnist import SourceKaggleMnist
 from source_lsun import SourceLsun
 from source_mnist import SourceMnist
 
@@ -17,7 +18,8 @@ class Reader(object):
         data source virtual constructor. data_path can be None to use default
         path.
         """
-        source_clazzs = [SourceCifar10, SourceLsun, SourceMnist]
+        source_clazzs = [
+            SourceCifar10, SourceKaggleMnist, SourceLsun, SourceMnist]
         source_clazz = None
 
         for clazz in source_clazzs:
