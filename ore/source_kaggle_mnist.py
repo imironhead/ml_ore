@@ -18,7 +18,7 @@ class SourceKaggleMnist(object):
         """
         path_home = os.path.expanduser('~')
 
-        return os.path.join(path_home, 'datasets', 'kaggle_mnist')
+        return os.path.join(path_home, 'datasets', 'kaggle', 'mnist')
 
     @staticmethod
     def subsets():
