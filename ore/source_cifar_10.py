@@ -20,7 +20,7 @@ class SourceCifar10(object):
         """
         path_home = os.path.expanduser('~')
 
-        return os.path.join(path_home, 'data', 'cifar-10-batches-py')
+        return os.path.join(path_home, 'datasets', 'cifar-10-batches-py')
 
     @staticmethod
     def subsets():
