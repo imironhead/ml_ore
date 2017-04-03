@@ -21,7 +21,7 @@ class SourceMnist(object):
         """
         path_home = os.path.expanduser('~')
 
-        return os.path.join(path_home, 'data', 'mnist')
+        return os.path.join(path_home, 'datasets', 'mnist')
 
     @staticmethod
     def subsets():
