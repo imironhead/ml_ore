@@ -1,4 +1,5 @@
 """
 """
 from datasets import *
-from reader import Reader
+from deterministic_reader import DeterministicReader
+from random_reader import RandomReader

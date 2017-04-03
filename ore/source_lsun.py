@@ -275,7 +275,7 @@ class SourceLsun(object):
 
         return table[dataset]
 
-    def __init__(self, dataset, data_path=None):
+    def __init__(self, dataset, range_percentage=(0, 100), data_path=None):
         """
         """
         if data_path is None:
@@ -296,6 +296,18 @@ class SourceLsun(object):
             self._lmdb_keys = pickle.Unpickler(kf).load()
 
         self._lmdb_path = data_path
+
+        # NOTE: range must be dealt within each source due to the layout of
+        #       sources may be different.
+        head, tail = range_percentage
+        size = len(self._lmdb_keys)
+        head = head * size // 100
+        tail = tail * size // 100
+
+        if head >= tail:
+            raise Exception('the range is too narrow')
+
+        self._lmdb_keys = self._lmdb_keys[head:tail]
 
     @property
     def cite(self):
