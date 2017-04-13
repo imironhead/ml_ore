@@ -1,9 +1,8 @@
 """
 reader class to handle different datasets.
 """
-import numpy
-
 from source_cifar_10 import SourceCifar10
+from source_kaggle_mnist import SourceKaggleMnist
 from source_lsun import SourceLsun
 from source_mnist import SourceMnist
 
@@ -12,12 +11,13 @@ class Reader(object):
     """
     """
     @staticmethod
-    def create_source(dataset, data_path=None):
+    def create_source(dataset, range_percentage=(0, 100), data_path=None):
         """
         data source virtual constructor. data_path can be None to use default
         path.
         """
-        source_clazzs = [SourceCifar10, SourceLsun, SourceMnist]
+        source_clazzs = [
+            SourceCifar10, SourceKaggleMnist, SourceLsun, SourceMnist]
         source_clazz = None
 
         for clazz in source_clazzs:
@@ -28,14 +28,22 @@ class Reader(object):
         if source_clazz is None:
             raise Exception('dataset {} is not suported'.format(dataset))
 
-        return source_clazz(dataset, data_path)
+        return source_clazz(dataset, range_percentage, data_path)
 
-    def __init__(self, dataset, data_path=None):
+    def __init__(self, dataset, range_percentage=(0, 100), data_path=None):
         """
         """
-        self._source = Reader.create_source(dataset, data_path)
-        self._indice = numpy.random.permutation(self._source.size)
-        self._position = 0
+        # sanity check
+        if range_percentage is None:
+            raise Exception('range must be inside [0, 100)')
+
+        head, tail = range_percentage
+
+        if head < 0 or head >= 100 or tail <= head or tail > 100:
+            raise Exception('range must be inside [0, 100)')
+
+        self._source = Reader.create_source(
+            dataset, range_percentage, data_path)
 
     @property
     def cite(self):
@@ -57,27 +65,11 @@ class Reader(object):
 
     def next_batch(self, batch_size, **options):
         """
-        map_fn: map_fn(source_numpy_array), return target_numpy_array
-        one_hot: return one_hot label if it's True
+        map_fn:
+            map_fn(source_numpy_array), return target_numpy_array
+        one_hot:
+            return one_hot label if it's True
         """
-        is_new_epoch = False
+        raise Exception('Reader.next_batch: should never be here!')
 
-        begin = self._position
-
-        self._position += batch_size
-
-        if self._position > len(self._indice):
-            numpy.random.shuffle(self._indice)
-
-            begin = 0
-
-            is_new_epoch = True
-
-            self._position = batch_size
-
-            assert batch_size <= len(self._indice)
-
-        new_batch = self._source.batch(
-            self._indice[begin:self._position], **options)
-
-        return new_batch + (is_new_epoch,)
+        return None

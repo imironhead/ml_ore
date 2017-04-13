@@ -20,7 +20,7 @@ class SourceCifar10(object):
         """
         path_home = os.path.expanduser('~')
 
-        return os.path.join(path_home, 'data', 'cifar-10-batches-py')
+        return os.path.join(path_home, 'datasets', 'cifar-10-batches-py')
 
     @staticmethod
     def subsets():
@@ -120,7 +120,7 @@ class SourceCifar10(object):
         """
         return img
 
-    def __init__(self, dataset, data_path=None):
+    def __init__(self, dataset, range_percentage=(0, 100), data_path=None):
         """
         """
         if data_path is None:
@@ -159,6 +159,19 @@ class SourceCifar10(object):
 
         self._images = numpy.concatenate(self._images)
         self._labels = numpy.concatenate(self._labels)
+
+        # NOTE: range must be dealt within each source due to the layout of
+        #       sources may be different.
+        head, tail = range_percentage
+        size = self._labels.shape[0]
+        head = head * size // 100
+        tail = tail * size // 100
+
+        if head >= tail:
+            raise Exception('the range is too narrow')
+
+        self._images = self._images[head:tail]
+        self._labels = self._labels[head:tail]
 
     @property
     def cite(self):

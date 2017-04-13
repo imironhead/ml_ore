@@ -10,7 +10,7 @@ from setuptools import setup
 
 setup(
     name='ore',
-    version='0.0.3',
+    version='0.0.4',
     url='https://github.com/imironhead/ml_ore',
     description='ask me later',
     long_description='ask me later please',
@@ -21,5 +21,5 @@ setup(
     classifiers=[
         'Programming Language :: Python :: 2.7'
     ],
-    install_requires=['lmdb', 'numpy', 'pillow', 'scipy', 'six']
+    install_requires=['future', 'lmdb', 'numpy', 'pillow', 'scipy', 'six']
 )

@@ -21,7 +21,7 @@ class SourceMnist(object):
         """
         path_home = os.path.expanduser('~')
 
-        return os.path.join(path_home, 'data', 'mnist')
+        return os.path.join(path_home, 'datasets', 'mnist')
 
     @staticmethod
     def subsets():
@@ -127,7 +127,7 @@ class SourceMnist(object):
 
         return labels.astype(numpy.int32)
 
-    def __init__(self, dataset, data_path):
+    def __init__(self, dataset, range_percentage=(0, 100), data_path=None):
         """
         """
         if data_path is None:
@@ -152,6 +152,19 @@ class SourceMnist(object):
         self._labels = SourceMnist.extract_labels(path_labels)
         self._images = SourceMnist.extract_images(path_images)
         self._images = self._images.astype(numpy.float32) / 127.5 - 1.0
+
+        # NOTE: range must be dealt within each source due to the layout of
+        #       sources may be different.
+        head, tail = range_percentage
+        size = self._labels.shape[0]
+        head = head * size // 100
+        tail = tail * size // 100
+
+        if head >= tail:
+            raise Exception('the range is too narrow')
+
+        self._images = self._images[head:tail]
+        self._labels = self._labels[head:tail]
 
     @property
     def cite(self):
